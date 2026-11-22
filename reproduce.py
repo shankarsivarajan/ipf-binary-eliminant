@@ -4,8 +4,8 @@ Each check recomputes the quantity independently and compares it with the value 
 Real-root counts use certified root isolation (Arb balls in python-flint); polynomials over Q are exact.
 
 Usage:
-    python reproduce.py          # full verification (Examples A.1-A.7)
-    python reproduce.py --fast   # skip Example A.5 (2x3x4)
+    python reproduce.py          # full verification (Examples A.1-A.8)
+    python reproduce.py --fast   # skip Example A.6 (2x3x4)
 """
 import argparse
 import itertools
@@ -81,8 +81,8 @@ def common_odds_ratio(P, T):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Verify Examples A.1-A.7 from the paper.")
-    parser.add_argument("--fast", action="store_true", help="Skip Example A.5 (2x3x4).")
+    parser = argparse.ArgumentParser(description="Verify Examples A.1-A.8 from the paper.")
+    parser.add_argument("--fast", action="store_true", help="Skip Example A.6 (2x3x4).")
     args = parser.parse_args()
 
     # ------------------------------------------------------------ Example A.1
@@ -145,7 +145,42 @@ def main():
     x_hat = float(ipf_ntwi(T3.astype(float), n3.astype(float))[0, 0, 0])
     check("A.3: fitted P_111 = 3.2838372433", close(x_hat, 3.2838372433), f"{x_hat:.10f}")
 
-    # ---------------------------------------------------- Examples A.4 & A.5
+    # ------------------------------------------------------------ Example A.4
+    # Theorem 4.8: joint eigenvalues of the Gamma_q outside U for the first two columns of Example A.3
+    T4, n4 = T3[:, :, :2], n3[:, :, :2]
+    eqs4 = build_exact(T4, n4)
+    G = [flint.fmpq_mat([[flint.fmpq(int(v)) for v in row] for row in delta(eqs4, q)]) for q in range(5)]
+    Dinv = G[2].inv()
+    G = [Dinv * g for g in G]  # Gamma_q normalized by alpha'_3 = 1
+    dim = G[0].nrows()
+    I36 = flint.fmpq_mat(dim, dim, [int(i == j) for i in range(dim) for j in range(dim)])
+    c = (7, 11, 0, 13, 17)  # L = sum_q c_q Gamma_q has eigenvalue 7 a'_1 + 11 a'_2 + 13 b_1 + 17 b_2 at theta
+    L = sum((c[q] * G[q] for q in range(5)), flint.fmpq_mat(dim, dim))
+    fac = flint.fmpq_poly(L.charpoly()).factor()[1]
+    stated = {(0, F(4, 15), F(-4, 15), 0): 1, (F(63, 20), 0, F(3, 5), 0): 1, (0, F(16, 1625), 0, F(-24, 65)): 1,
+              (F(-9, 125), 0, 0, F(-6, 25)): 1, (0, 0, F(-1, 10), 0): 2, (0, 0, 0, F(-16, 55)): 2, (0, 0, 0, 0): 16}
+    by_value = {7 * t[0] + 11 * t[1] + 13 * t[2] + 17 * t[3]: t for t in stated}
+    found, semisimple = {}, True
+    for f, e in fac:
+        if f.degree() == 1:
+            lam = -f[0] / f[1]
+            found[by_value.get(F(int(lam.p), int(lam.q)))] = e
+            semisimple &= dim - (L - lam * I36).rank() == e
+    deg_U = [f.degree() for f, e in fac if f.degree() > 1]
+    check("A.4: dim H = 36, and the 12 complex solutions form one factor in U", dim == 36 and deg_U == [12], f"{deg_U}")
+    check("A.4: boundary eigenvalues and multiplicities as stated", found == stated, f"{len(found)} points")
+    check("A.4: boundary eigenvalues semisimple", semisimple)
+    # entries in the column k of B: saturated rows give m_jk, the other rows j < 3 give R_j, row 3 the rest of C_k
+    m4, R4, C4 = n4[0] + n4[1], n4[0].sum(1), n4[0].sum(0)
+    tables = {((0,), 0): (9, 15, -8), ((1,), 0): (2, 9, 5), ((0,), 1): (3, 15, -6), ((1,), 1): (2, 13, -3),
+              ((0, 1), 0): (9, 9, -2), ((0, 1), 1): (3, 13, -4)}
+    ok = list(m4[:, 0]) == [9, 9, 10] and list(m4[:, 1]) == [3, 13, 7] and list(R4) == [2, 15, 11] and list(C4) == [16, 12]
+    for (sig, k), col in tables.items():
+        X = [int(m4[j, k]) if j in sig else int(R4[j]) for j in (0, 1)]
+        ok &= (X[0], X[1], int(C4[k]) - X[0] - X[1]) == col
+    check("A.4: margins and boundary entries X_jk as stated", ok)
+
+    # ---------------------------------------------------- Examples A.5 & A.6
     def mle_case(n_arr, label, stated_R, stated_deg, stated_root):
         J, K = n_arr.shape[1], n_arr.shape[2]
         T_ones = np.ones((2, J, K), dtype=int)
@@ -235,21 +270,21 @@ def main():
             f"{rr_ml}, IPF {x_mle:.10f}",
         )
 
-    mle_case(n3, "A.4", 89, 31, 4.1615312803)
+    mle_case(n3, "A.5", 89, 31, 4.1615312803)
     if args.fast:
-        print("[SKIP] A.5 (--fast mode)", flush=True)
+        print("[SKIP] A.6 (--fast mode)", flush=True)
     else:
         n5 = np.array([[[8, 3, 5, 8], [2, 3, 2, 5], [9, 2, 4, 4]], [[9, 2, 5, 3], [1, 7, 1, 3], [5, 5, 2, 9]]])
-        mle_case(n5, "A.5", 477, 115, 9.9706390967)
+        mle_case(n5, "A.6", 477, 115, 9.9706390967)
 
-    # ------------------------------------------------------------ Example A.6
+    # ------------------------------------------------------------ Example A.7
     T6, n6 = table22(
         [[[197, 53], [98, 102]], [[23, 5], [23, 57]], [[142, 79], [85, 48]]],
         [[[132, 430], [663, 34]], [[77, 439], [472, 34]], [[107, 518], [785, 3493]]],
     )
     E = eliminant_22K(T6.astype(int), n6.astype(int))
     Z = to_fmpz([E[i] for i in range(E.degree() + 1)])
-    check("A.6: E has degree 12", Z.degree() == 12)
+    check("A.7: E has degree 12", Z.degree() == 12)
     roots = [complex(z.real.mid(), z.imag.mid()) for z, _ in Z.complex_roots()]
     r_ = n6[0].sum(0)
     rp = n6[1].sum(0)
@@ -278,22 +313,22 @@ def main():
         return float(np.max(np.abs(np.linalg.eigvals(np.linalg.pinv(B) @ D @ B))))
 
     psi_hat = common_odds_ratio(ipf_ntwi(T6, n6), T6)
-    check("A.6: psi-hat = 0.0103229485", close(psi_hat, 0.0103229485), f"{psi_hat:.10f}")
+    check("A.7: psi-hat = 0.0103229485", close(psi_hat, 0.0103229485), f"{psi_hat:.10f}")
     pair = [
         z for z in roots
         if abs(z - complex(-0.0429312847, 0.0067384684)) < 1e-8
         or abs(z - complex(-0.0429312847, -0.0067384684)) < 1e-8
     ]
-    check("A.6: conjugate pair psi = -0.0429312847 +- 0.0067384684i is a root", len(pair) == 2)
+    check("A.7: conjugate pair psi = -0.0429312847 +- 0.0067384684i is a root", len(pair) == 2)
     rads = [radius(solution(z)) for z in pair]
-    check("A.6: spectral radius 0.5347 at the pair", all(abs(r - 0.5347) < 5e-5 for r in rads), f"{rads}")
+    check("A.7: spectral radius 0.5347 at the pair", all(abs(r - 0.5347) < 5e-5 for r in rads), f"{rads}")
     check(
-        "A.6: spectral radius 0.7310 at the fitted table",
+        "A.7: spectral radius 0.7310 at the fitted table",
         abs(radius(solution(psi_hat)) - 0.7310) < 5e-5,
         f"{radius(solution(psi_hat)):.6f}",
     )
 
-    # ------------------------------------------------------------ Example A.7
+    # ------------------------------------------------------------ Example A.8
     T7, n7 = table22([[[1, 1], [1, 1]], [[1, 1], [1, 1]]], [[[10, 1], [3, 1]], [[1, 1], [50, 10]]])
     E = eliminant_22K(T7.astype(int), n7.astype(int))
     Z = to_fmpz([E[i] for i in range(E.degree() + 1)])
@@ -310,12 +345,12 @@ def main():
     c7 = n7[:, 0, :].sum(0)
     N7 = n7[0, 0, :].sum()
     Nk7 = n7.sum((0, 1))
-    check("A.7: N = 11 differs from sum r_k c_k / N_k", N7 == 11 and abs(N7 - (r7 * c7 / Nk7).sum()) > 1e-6)
-    check("A.7: E = const * (psi-1) * F, F as stated", e == 1 and [int(v) for v in Fp.coeffs()] == [-2420, -5687, 3686, 10812])
-    check("A.7: F irreducible over Q", irreducible(Fp))
+    check("A.8: N = 11 differs from sum r_k c_k / N_k", N7 == 11 and abs(N7 - (r7 * c7 / Nk7).sum()) > 1e-6)
+    check("A.8: E = const * (psi-1) * F, F as stated", e == 1 and [int(v) for v in Fp.coeffs()] == [-2420, -5687, 3686, 10812])
+    check("A.8: F irreducible over Q", irreducible(Fp))
     rr = real_roots_certified(Fp)
     check(
-        "A.7: three real roots as stated",
+        "A.8: three real roots as stated",
         len(rr) == 3 and all(close(a, b) for a, b in zip(rr, [-0.5882641171, -0.5054368472, 0.7527834652])),
         f"{rr}",
     )
@@ -331,8 +366,8 @@ def main():
             for b in range(2)
         )
         allreal &= ok
-    check("A.7: each real root carries a solution with real entries", allreal)
-    check("A.7: psi-hat = 0.7527834652", close(common_odds_ratio(ipf_ntwi(T7, n7), T7), 0.7527834652))
+    check("A.8: each real root carries a solution with real entries", allreal)
+    check("A.8: psi-hat = 0.7527834652", close(common_odds_ratio(ipf_ntwi(T7, n7), T7), 0.7527834652))
 
     nfail = sum(1 for _, ok in RESULTS if not ok)
     print(f"\n{len(RESULTS) - nfail}/{len(RESULTS)} checks passed in {(time.time() - T0) / 60:.1f} min")

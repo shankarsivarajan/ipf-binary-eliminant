@@ -1,0 +1,38 @@
+[PASS] A.1: E has degree 12
+[PASS] A.1: E irreducible over Q
+[PASS] A.1: real roots as stated   ([0.17349840199078476, 0.17797079726587928, 0.971768141042135, 1.2197185992152624, 1.94772524081635, 2.814607318383903])
+[PASS] A.1: psi-hat = 1.2197185992   (1.2197185992)
+[PASS] A.2: E = const * (psi-1)^5 * F   (power 5, deg F 7)
+[PASS] A.2: F coefficients as stated
+[PASS] A.2: F irreducible over Q
+[PASS] A.2: single real root = MLE 1.4210239993   ([1.421023999334886], IPF 1.4210239993)
+[PASS] A.3: E_11 has degree 81
+[PASS] A.3: E_11 irreducible over Q
+[PASS] A.3: 33 real roots   (33)
+[PASS] A.3: m11 = 9 and five roots in (0, 9) as stated   ([2.288761625176871, 2.7354972215056184, 3.28383724328434, 4.259128277791724, 4.55103756398386])
+[PASS] A.3: fitted P_111 = 3.2838372433   (3.2838372433)
+[PASS] A.4: dim H = 36, and the 12 complex solutions form one factor in U   ([12])
+[PASS] A.4: boundary eigenvalues and multiplicities as stated   (7 points)
+[PASS] A.4: boundary eigenvalues semisimple
+[PASS] A.4: margins and boundary entries X_jk as stated
+[PASS] A.5: R has degree 89   (89)
+[PASS] A.5: E_ML degree 31, irreducible   (31)
+[PASS] A.5: E_ML divides R with multiplicity one (mod p)   (1)
+[PASS] A.5: single real root = fitted P_111 = 4.1615312803   ([4.16153128030249], IPF 4.1615312803)
+[PASS] A.6: R has degree 477   (477)
+[PASS] A.6: E_ML degree 115, irreducible   (115)
+[PASS] A.6: E_ML divides R with multiplicity one (mod p)   (1)
+[PASS] A.6: single real root = fitted P_111 = 9.9706390967   ([9.970639096669078], IPF 9.9706390967)
+[PASS] A.7: E has degree 12
+[PASS] A.7: psi-hat = 0.0103229485   (0.0103229485)
+[PASS] A.7: conjugate pair psi = -0.0429312847 +- 0.0067384684i is a root
+[PASS] A.7: spectral radius 0.5347 at the pair   ([0.5347217233405408, 0.5347217233405408])
+[PASS] A.7: spectral radius 0.7310 at the fitted table   (0.731017)
+[PASS] A.8: N = 11 differs from sum r_k c_k / N_k
+[PASS] A.8: E = const * (psi-1) * F, F as stated
+[PASS] A.8: F irreducible over Q
+[PASS] A.8: three real roots as stated   ([-0.5882641171106473, -0.5054368471742057, 0.7527834652097511])
+[PASS] A.8: each real root carries a solution with real entries
+[PASS] A.8: psi-hat = 0.7527834652
+
+36/36 checks passed in 6.1 min

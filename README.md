@@ -24,7 +24,7 @@ For $2\times 2\times K$ tables, `eliminant_22k` computes the exact integer polyn
 import numpy as np
 from ipf_binary_eliminant import eliminant_22k, ipf_ntwi
 
-# Example A.7: 2x2x2 table with uniform seed T = 1
+# Example A.8: 2x2x2 table with uniform seed T = 1
 T = np.ones((2, 2, 2), dtype=int)
 n = np.stack([[[10, 1], [3, 1]], [[1, 1], [50, 10]]], axis=2)
 
@@ -43,9 +43,10 @@ For general $2\times J\times K$ tables with a generic seed $T$, `corner_eliminan
 | Theorems 3.2 and 3.5 | `eliminant_22k` (`eliminant_22k.py`) | Exact $E(\psi) \in \mathbb{Z}[\psi]$ for $2\times 2\times K$ tables |
 | Section 4 | `build_exact`, `delta` (`atkinson.py`) | Atkinson operator determinants $\Delta_p$ for $2\times J\times K$ tables |
 | Theorem 4.7 | `monic_mod_p` (`corner_pencil.py`), `corner_eliminant` (`corner_eliminant.py`) | Restricted corner pencil and exact $E_{11}(x) \in \mathbb{Q}[x]$ |
+| Theorem 4.8 | `build_exact`, `delta` (`atkinson.py`); Example A.4 in `reproduce.py` | Joint eigenvalues outside $U$ (boundary subproblems) and their multiplicities |
 | Theorem 4.9, Conjecture 4.10 | `R_mod_p` (`mle_regular_part.py`) | Regular part $\mathcal{R}(x)$ of the singular $T = \mathbf{1}$ pencil mod $p$ |
 | Section 5 | `pi_matrix`, `orbit_basis`, `sweep_radius` (`linearization.py`) | Linearization $D_S$ on $\mathcal{V}$ and its spectral radius |
-| Appendix A | `reproduce.py` | Verifies every numerical claim in Examples A.1–A.7 |
+| Appendix A | `reproduce.py` | Verifies every numerical claim in Examples A.1–A.8 |
 
 ## Reproducing the paper
 
@@ -53,8 +54,8 @@ Requirements: Python 3.10+, `numpy`, `python-flint`.
 
 ```bash
 pip install -e .             # or: pip install numpy python-flint
-python reproduce.py          # full verification (Examples A.1-A.7)
-python reproduce.py --fast   # skip Example A.5 (2x3x4)
+python reproduce.py          # full verification (Examples A.1-A.8)
+python reproduce.py --fast   # skip Example A.6 (2x3x4)
 ```
 
 Each check prints `[PASS]` or `[FAIL]` with the recomputed value. Polynomials over $\mathbb{Q}$ are computed exactly, and real-root counts use certified root isolation (Arb balls in `python-flint`).
